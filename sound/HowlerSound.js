@@ -20,6 +20,7 @@ const MIN_SPEAK_TIME = 10
 export default class HowlerSound {
   constructor(soundOptions, id) {
     this._id = id
+    this.unique = Math.random().toString()
     this._soundOptions = _.clone(soundOptions)
       //this._sProxy = new SoundProxy(this._soundOptions, (prop, val) => { this.onPropertyChanged(prop, val) })
     this._volumeTweenObj = {
@@ -59,34 +60,6 @@ export default class HowlerSound {
   }
 
 
-
-  /*onPropertyChanged(prop, val) {
-    console.log("8**********************");
-    console.log(prop, val);
-    console.log("8**********************");
-    if (!this.sound) {
-      return
-    }
-    if (this.sound[prop]) {
-      if (prop === 'volume') {
-        this._easeVolume.target = val
-      }
-      if (this._id === 'music') {
-        //console.log(`changed ${this._id} volume: ${val}`);
-      }
-      //console.log(`changed ${this._id} volume: ${val}`);
-      if (typeof this.sound[prop] === 'function') {
-        if (this._id === 'music') {
-          //console.log(`changed ${this._id} volume: ${val}`);
-        }
-        this.sound[prop](val)
-      } else {
-        this.sound[prop] = val
-      }
-    }
-  }*/
-
-
   get playing() {
     if (!this.sound)
       return false
@@ -104,7 +77,7 @@ export default class HowlerSound {
   }
 
   duration() {
-    if(this.sound){
+    if (this.sound) {
       return this.sound.duration() || 0
     }
     return 0
@@ -211,7 +184,9 @@ export default class HowlerSound {
   }
 
   _onLoaded(value) {
-    this.loadedSignal.dispatch(this)
+    if (this.loadedSignal) {
+      this.loadedSignal.dispatch(this)
+    }
     if (CONFIG.partialPlayOnBackground) {
       if (this._id === 'speaking') {
         this._setPlaytime()
@@ -250,7 +225,9 @@ export default class HowlerSound {
   }
 
   _onPlay() {
-    this.playingSignal.dispatch(this)
+    if (this.playingSignal) {
+      this.playingSignal.dispatch(this)
+    }
   }
 
   _onPause() {}
@@ -263,7 +240,9 @@ export default class HowlerSound {
     //pass this in the terminatedSignal
     if (this.sound) {
       this.sound.hasFinished = true
-      this.endedSignal.dispatch(this)
+      if (this.endedSignal) {
+        this.endedSignal.dispatch(this)
+      }
     }
   }
 
@@ -287,16 +266,26 @@ export default class HowlerSound {
 
   _terminate() {
     //kill
-    this.terminatedSignal.dispatch(this)
+    if (this.terminatedSignal) {
+      this.terminatedSignal.dispatch(this)
+    }
   }
 
   destroy() {
     EaseNumbers.remove(this._easeVolume)
       //this._sProxy.destroy()
-    this.endedSignal.dispose()
-    this.terminatedSignal.dispose()
-    this.playingSignal.dispose()
-    this.loadedSignal.dispose()
+    if (this.endedSignal) {
+      this.endedSignal.dispose()
+    }
+    if (this.terminatedSignal) {
+      this.terminatedSignal.dispose()
+    }
+    if (this.playingSignal) {
+      this.playingSignal.dispose()
+    }
+    if (this.loadedSignal) {
+      this.loadedSignal.dispose()
+    }
     this.sound.off('load', this._onLoadedBound)
     this.sound.off('play', this._onPlayBound)
     this.sound.off('pause', this._onPauseBound)
@@ -310,7 +299,11 @@ export default class HowlerSound {
     this._onFadeBound = null
     this._onPauseBound = null
     this._onPlayBound = null
+    this.endedSignal = null
+    this.terminatedSignal = null
+    this.playingSignal = null
+    this.loadedSignal = null
 
-    console.log("HowlerSoundDestoyed");
+    console.log("HowlerSoundDestoyed", this.unique);
   }
 }

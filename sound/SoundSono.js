@@ -13,7 +13,7 @@ export default class Sound {
   }
 
   _onLoaded() {
-    console.log('`', 'Sound Loaded');
+    //console.log('`', 'Sound Loaded');
     Emitter.emit('sound:loaded')
   }
 
@@ -24,10 +24,10 @@ export default class Sound {
   _create(config) {
     this._s = Sono.createSound(config)
     this._s.on('loaded', () => {
-      console.log('`', 'Sound Loaded');
+      //console.log('`', 'Sound Loaded');
     })
     this._s.on('ended', () => {
-      console.log('`', 'Sound Ended');
+      //console.log('`', 'Sound Ended');
       Emitter.emit('sound:ended')
     })
   }

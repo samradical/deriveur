@@ -76,7 +76,7 @@ const P = (() => {
     }
 
     init(locations) {
-      this._metronome = new Metronome([`${CONFIG.assetUrl}assets/audio/dummy.mp3`], {
+      this._metronome = new Metronome([`${CONFIG.assetsUrl}audio/dummy.mp3`], {
         "tempo": 120,
         "beatsPerBar": 4,
         "loopLength": 4

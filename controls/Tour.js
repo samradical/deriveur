@@ -4,16 +4,16 @@ import Emitter from '../utils/DerivEmitter'
 export default class Tour {
   constructor(locations) {
     this._tour = locations.map(location => {
-        return {
-          latitude: location.latitude,
-          longitude: location.longitude,
-          id: location.id,
-          distance: 0,
-          visited: false,
-          active: false
-        }
-      })
-      //localStorage.removeItem('locations')
+      return {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        id: location.id,
+        distance: 0,
+        visited: false,
+        active: false
+      }
+    })
+    localStorage.removeItem('locations')
     this._seenLocations = this._seenLocations || ''
     this._seenLocations = this._seenLocations.split(',')
     if (this._seenLocations[0] === "") {
@@ -29,7 +29,23 @@ export default class Tour {
       this._getDistance(this.nextLocation)
     })
 
-    Emitter.emit('ext:tour:nextlocation', this.nextLocation)
+    setInterval(() => {
+      let _n = this.nextLocation
+      let _bearing = geolib.getBearing(
+        this._latLngObj(this._userCoords), {
+          latitude: _n.latitude,
+          longitude: _n.longitude
+        }
+      )
+      Emitter.emit('ext:map:bearing', _bearing)
+      Emitter.emit('ext:tour:nextlocation', _n)
+    }, 4000)
+
+    Emitter.emit('ext:tour:nextlocation', this.nextlocation)
+  }
+
+  _latLngObj(pos) {
+    return { latitude: pos.latitude, longitude: pos.longitude }
   }
 
   in (locationId) {
@@ -50,7 +66,7 @@ export default class Tour {
       this._activeLocation.active = false
       this.addLocationToStorage(this._activeLocation.id)
     }
-    Emitter.emit('ext:tour:nextlocation', this.nextLocation)
+    //Emitter.emit('ext:tour:nextlocation', this.nextLocation)
   }
 
   _latLngObj(pos) {

@@ -26,12 +26,12 @@ export default class BaseLayer {
             this._sound.endedSignal.add(this.onEnded.bind(this))
 
             this._sound.loadedSignal.add((soundId) => {
-                this.preloadNext()
+                //this.preloadNext()
             })
             this._sound.playingSignal.add(this.onPlaying.bind(this))
 
             this._playlist = []
-            this._playedSources = {}
+            this._playedSources = []
                 //every locations every update
             this._updatedLocations = []
         }
@@ -57,7 +57,7 @@ export default class BaseLayer {
         }
         /*if (State.state === 'in') {
           if(this._id === 'speaking'){
-            console.log(this._playlist);
+            //console.log(this._playlist);
           }
         } else {
           this._buildOutPlaylist()
@@ -71,13 +71,10 @@ export default class BaseLayer {
 
     onEnded(endObj) {
         let { soundName, soundIndex, hasFinished, progress } = endObj
-        if (hasFinished) {
-            delete this._playedSources[soundName]
-        } else {
-            this._playedSources[soundName] = this._playedSources[soundName] || {}
-            this._playedSources[soundName].hasFinished = hasFinished
-            this._playedSources[soundName].progress = progress
-        }
+        console.log("%%%%%%%%%%%%%%%%%%%%%%");
+        console.log(endObj);
+        console.log("%%%%%%%%%%%%%%%%%%%%%%");
+        this._playedSources.push(soundName)
     }
 
     onPlaying() {
@@ -92,7 +89,7 @@ export default class BaseLayer {
         let _r = []
         if (this._sound.sounds) {
             _.each(this._sound.sounds, sound => {
-                console.log(sound);
+                //console.log(sound);
                 //howler sound
                 if (sound.sound && !sound.sound.markedToDestroy) {
                     _r.push('--------------')
@@ -152,8 +149,8 @@ export default class BaseLayer {
         this._updatedLocations = _locations
         let _currentlyPlaying = this._playlist.shift()
         this._closestLocation = locations[0]
-        console.log(this._id);
-        console.log(_locations);
+            //console.log(this._id);
+            //console.log(_locations);
         let _totalSourcesLength = 0
         _.each(_locations, location => {
                 location.sourcesLength = 0
@@ -176,6 +173,8 @@ export default class BaseLayer {
         Cut the sources into a playlist based on the roll factor
         */
         this._playlist.length = 0
+
+
         let _locationIndex = 0
         let _totalLocations = _locations.length
         let _failedTries = 0
@@ -194,7 +193,10 @@ export default class BaseLayer {
                         src: _sources,
                         nearFactor: _l.nearFactor
                     }
+                    let _name = this._getFileNameFromSource(_sources)
                     this._playlist.push(_s)
+                    if(this._playedSources.indexOf(_name) < 0){
+                    }
                 } else {
                     _locationIndex = (_locationIndex + 1) % _totalLocations
                     _failedTries++
@@ -263,11 +265,7 @@ export default class BaseLayer {
     We get the obj that will have the progress saved
     */
     play(fadeDur = 500) {
-        let _name = this._sound.soundname
-        let _savedData = this._playedSources[_name]
-        console.log(`Layer: play() ${this._id}`);
-        console.log('Saved data', _savedData);
-        this._sound.play(_savedData, fadeDur)
+        this._sound.play(null, fadeDur)
     }
 
     pause() {
@@ -278,7 +276,7 @@ export default class BaseLayer {
         this._sound.resume()
     }
 
-    destroy(){
+    destroy() {
         this._sound.destroy()
     }
 
@@ -303,31 +301,38 @@ export default class BaseLayer {
         //this._changeFileIndex(1)
         //new sound at new index, remove from playlist
         let _source
-        console.log(this._playlist);
-        console.log(sources);
+            //console.log(this._playlist);
+            //console.log(sources);
         if (sources) {
             _source = sources.shift()
         } else {
             _source = this._playlist.shift()
         }
-        console.log(_source);
+        //console.log(_source);
         if (_source) {
             let _name = this._getFileNameFromSource(_source)
             soundOptions = soundOptions || _source.soundOptions
 
-            console.log("BaseLayer, _loadNext() ----------");
-            console.log(_source);
-            console.log(_source.soundOptions);
-            console.log("----------");
+            if(this._id === 'music'){
+                console.log("------------------");
+                console.log(_source);
+                console.log(soundOptions);
+                console.log(this.scheduledVolume);
+                console.log("------------------");
+            }
+            //console.log("BaseLayer, _loadNext() ----------");
+            //console.log(_source);
+            //console.log(_source.soundOptions);
+            //console.log("----------");
             //get the near factor
             this._sound.newSound(_source, _name, soundOptions, force)
                 //allow the manager to preload the next
             this._preloading = false
                 //destroy current the preloader
-            if (this._preloader) {
+            /*if (this._preloader) {
                 this._preloader.destroy()
                 this._preloader = null
-            }
+            }*/
         } else {
             Emitter.emit('log:error', `_loadNext fail ${this._id} no source`)
         }
@@ -386,8 +391,8 @@ export default class BaseLayer {
     Gets the already parsed location urls by location id
     */
     _getLocationSourcesById(locationId) {
-        console.log(this._locationsUrls);
-        console.log(locationId);
+        //console.log(this._locationsUrls);
+        //console.log(locationId);
         return this._locationsUrls[locationId].slice(0)
     }
 
@@ -397,7 +402,7 @@ export default class BaseLayer {
 
     _getLocationById(locationId) {
         return this._data.locations.filter(location => {
-            console.log(locationId, location.id);
+            //console.log(locationId, location.id);
             return location.id === locationId
         })[0]
     }
@@ -444,7 +449,8 @@ export default class BaseLayer {
         }
         //account for obj and arrays
         sourcePair = sourcePair.src || sourcePair
-        let _name = sourcePair[0].split('/')
+        let _i = sourcePair[0] ? 0 : 1
+        let _name = sourcePair[_i].split('/')
         _name = _name[_name.length - 2] + _name[_name.length - 1]
         return _name
     }
@@ -467,7 +473,7 @@ export default class BaseLayer {
             return location.id === locationId
         })
         if (!_l.length) {
-            console.log(`Failed _getDistanceFromUpdatedLocationsById ${locationId}`);
+            //console.log(`Failed _getDistanceFromUpdatedLocationsById ${locationId}`);
             return 0
         }
         return _l[0].distance
@@ -478,7 +484,7 @@ export default class BaseLayer {
             return location.id === locationId
         })
         if (!_l.length) {
-            console.log(`Failed _getDistanceFromUpdatedLocationsById ${locationId}`);
+            //console.log(`Failed _getDistanceFromUpdatedLocationsById ${locationId}`);
             return 0
         }
         return _l[0].distance
@@ -489,7 +495,7 @@ export default class BaseLayer {
     */
     _getNearFactor(distance, radius = PERSONAL_RADIUS) {
         return State.nearFactor
-            //console.log(`_getNearFactor:distance, ${distance} radius: ${radius}`);
+            ////console.log(`_getNearFactor:distance, ${distance} radius: ${radius}`);
         return Utils.clamp(
             distance / radius,
             MIN_NEAR_FACTOR,
@@ -554,13 +560,13 @@ export default class BaseLayer {
                 }
                 if (CONFIG.filterOnlyAudioFormats) {
                     if (file.url.includes(`.${CONFIG.filterOnlyAudioFormats}`)) {
-                        return file.url
-                    }else{
+                        return file.url + `?z=${Math.random()}`
+                    } else {
                         return null
                     }
-                    return file.url
+                    return file.url + `?z=${Math.random()}`
                 } else {
-                    return file.url
+                    return file.url + `?z=${Math.random()}`
                 }
             })
         }))

@@ -24,19 +24,19 @@ export default class BaseSound {
       if (this._id) {
         this.scheduledVolume = volumes[this._id]
         if (this._id === 'music') {
-          /*console.log("+++++++++++++++++++++++++++++++++");
-          console.log(this.scheduledVolume);
-          console.log("+++++++++++++++++++++++++++++++++");*/
+          /*//console.log("+++++++++++++++++++++++++++++++++");
+          //console.log(this.scheduledVolume);
+          //console.log("+++++++++++++++++++++++++++++++++");*/
         }
         if (this.sound) {
-          /*console.log(1,"::::::::::::::::::::::::");
-          console.log(volumes);
-          console.log(this._id);
-          console.log(this.sound.volume);
-          console.log(this.scheduledVolume);*/
+          /*//console.log(1,"::::::::::::::::::::::::");
+          //console.log(volumes);
+          //console.log(this._id);
+          //console.log(this.sound.volume);
+          //console.log(this.scheduledVolume);*/
           this.sound.volume = this.scheduledVolume
         }
-        //console.log(this._id, this.scheduledVolume);
+        ////console.log(this._id, this.scheduledVolume);
       }
     })
 
@@ -45,6 +45,9 @@ export default class BaseSound {
 
   newSound(playlistObject, name = '', soundOptions = {}, force = false) {
     if (force) {
+      if(this._id === 'music'){
+      console.log(playlistObject);
+      }
       if (this.sound) {
 
         this._fadeAndDestroy(this.sound, 0, CONFIG.baseSoundFadeOut - 0.2)
@@ -65,6 +68,9 @@ export default class BaseSound {
   }
 
   _createNewSound(playlistObject, name, soundOptions) {
+    if(this._loadingSound){
+      return
+    }
     let _o = _.merge({
         name: name,
         autoplay: false,
@@ -75,11 +81,15 @@ export default class BaseSound {
       this._options.howler,
       soundOptions
     )
+    this.terminate()
     this.sound = new HowlerSound(_o, this._id)
     this.sound.terminatedSignal.addOnce(this._onTerminatedBound)
     this.sound.endedSignal.addOnce(this._onEndedBound)
     this.sound.playingSignal.addOnce(this._onPlayBound)
     this.sound.loadedSignal.addOnce(this._onLoadedBound)
+    this._loadingSound = true
+    console.log("Loading new Sound:");
+    console.log(_o);
   }
 
   onMetronome() {
@@ -124,7 +134,7 @@ export default class BaseSound {
     soundEndTime = soundEndTime || this.sound.duration()
     if (!this.sound.isEnding) {
       if (this._id === 'speaking') {
-        //console.log(this.sound.timeCounter, (soundEndTime - this.sound.overlapTime));
+        ////console.log(this.sound.timeCounter, (soundEndTime - this.sound.overlapTime));
       }
       if (this.sound.timeCounter > (soundEndTime - this.sound.overlapTime)) {
         this.sound.isEnding = true
@@ -238,9 +248,9 @@ export default class BaseSound {
   play(savedData, dur = 500) {
     if (this.sound) {
       let _vol = this._scheduledVolume
-      console.log(">>>>>>>>>>>>>>>>>>>>>>");
-      console.log("play()", this._id, 'at ', _vol);
-      console.log(">>>>>>>>>>>>>>>>>>>>>>");
+        //console.log(">>>>>>>>>>>>>>>>>>>>>>");
+        //console.log("play()", this._id, 'at ', _vol);
+        //console.log(">>>>>>>>>>>>>>>>>>>>>>");
       this.sound.play()
       this.sound.fade(0, _vol, dur)
 
@@ -292,8 +302,12 @@ export default class BaseSound {
   //HANDLERS
   ///********************
 
+  get soundLoading(){
+    return this._loadingSound
+  }
 
   _onLoaded(index) {
+    this._loadingSound = false
     this.loadedSignal.dispatch()
   }
 
@@ -355,28 +369,31 @@ export default class BaseSound {
     }
 
     Emitter.emit('log:log', `Sound ${this._id} ${this.sound.soundname} at ${this.soundIndex} terminate()`);
+    console.log(this.sound.unique);
     this.sound['markedToDestroy'] = true
-    this.sound.terminatedSignal.remove(this._onTerminatedBound)
-    this.sound.endedSignal.remove(this._onEndedBound)
-    this.sound.playingSignal.remove(this._onPlayBound)
-    this.sound.loadedSignal.remove(this._onLoadedBound)
-    this._destroySound(this.sound)
+    if (this.sound.terminatedSignal) {
+      this.sound.terminatedSignal.remove(this._onTerminatedBound)
+    }
+    if (this.sound.endedSignal) {
+      this.sound.endedSignal.remove(this._onEndedBound)
+    }
+    if (this.sound.playingSignal) {
+      this.sound.playingSignal.remove(this._onPlayBound)
+    }
+    if (this.sound.loadedSignal) {
+      this.sound.loadedSignal.remove(this._onLoadedBound)
+    }
+    this._loadingSound = false
+    console.log(this._sound.unique);
+    this._sound.destroy()
+    this._sound = null
       //alert
     if (this.endedSignal) {
-      console.log(_endObj);
-      try{
+      try {
         this.endedSignal.dispatch(_endObj)
-      }catch(err){
-        console.log(err);
+      } catch (err) {
+        //console.log(err);
       }
     }
-  }
-
-  _destroySound(sound) {
-    if (!sound) {
-      return
-    }
-    sound.destroy()
-    sound = null
   }
 }

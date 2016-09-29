@@ -98,7 +98,7 @@ export default class Map {
       pos.coords = { latitude: pos.latitude, longitude: pos.longitude }
     }
 
-    console.log(`updatePosition: ${JSON.stringify(pos.coords)}`);
+    //console.log(`updatePosition: ${JSON.stringify(pos.coords)}`);
     /*if (_.isEmpty(pos.coords)) {
       Emitter.emit('log:error', `Map: No latitude or longitude`);
       return
@@ -320,7 +320,7 @@ _drawMap(pos) {
 
   this.map = new google.maps.Map(document.getElementById("mapcontainer"), options);
   google.maps.event.addListener(this.map, 'tilesloaded', () => {
-    console.log("Tiled Loaded");
+    //console.log("Tiled Loaded");
     this.mapLoadedSignal.dispatch()
   });
   this._locations.forEach(location => {
@@ -336,7 +336,7 @@ _drawMap(pos) {
   google.maps.event.addListener(this.map, 'click', (event) => {
     this.updatePosition({ coords: { latitude: event.latLng.lat(), longitude: event.latLng.lng() } })
   });
-  console.log("Draw map");
+  //console.log("Draw map");
 }
 
 _nextLocation() {
@@ -345,7 +345,7 @@ _nextLocation() {
     _i = 0
   }
   this._activeLocationIndex = _i
-  console.log(this._activeLocationIndex, this._locations.length);
+  //console.log(this._activeLocationIndex, this._locations.length);
   this.updatePosition({
     coords: this._locations[this._activeLocationIndex]
   })

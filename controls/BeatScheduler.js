@@ -10,15 +10,15 @@ const BEATS = {
  in : [{
     speaking: 8,
     effects: 34,
-    music: 36,
+    music: 2,
   }, {
     speaking: 8,
     effects: 16,
-    music: 78,
+    music: 2,
   }, {
     speaking: 12,
     effects: 32,
-    music: 42,
+    music: 2,
   }, {
     speaking: 4,
     effects: 32,
@@ -26,11 +26,11 @@ const BEATS = {
   }, {
     speaking: 12,
     effects: 64,
-    music: 125,
+    music: 2,
   }, {
     speaking: 12,
     effects: 42,
-    music: 89,
+    music: 2,
   }],
   out: [{
     speaking: 64,

@@ -19,6 +19,7 @@ export default class EffectsLayer extends BaseLayer {
 
     Emitter.on('layer:effects:dominant:ended', () => {
       this._dominantEffectActive = false
+      Emitter.emit('volumescheduler:reset')
     })
 
     this._sound.terminate()
@@ -35,7 +36,7 @@ export default class EffectsLayer extends BaseLayer {
     this._setSoundSources()
   }
 
-  _setSoundSources(){
+  _setSoundSources() {
     let _srcLocations = this._makeSrcArrayFromLocationUrls()
     Utils.shuffle(_srcLocations)
     let _filteredDominant = this._filterSourcesByTerm(_srcLocations, 'interruptions')
@@ -58,11 +59,10 @@ export default class EffectsLayer extends BaseLayer {
     this._dominantEffectActive = true
     if (roll > 0.9) {
       this._playDominant()
-    } else {
-    }
+    } else {}
   }
 
-  _playAmbient(){
+  _playAmbient() {
     this._sound.rampUpAmbient()
   }
 
@@ -78,13 +78,37 @@ export default class EffectsLayer extends BaseLayer {
     return this._getSoundAt(0)
   }
 
+  get scheduledVolume() {
+    return this._scheduledVolume || this._sound.volume
+  }
+
+  set scheduledVolume(v) {
+    this._scheduledVolume = v
+    this._sound.scheduledVolume = v
+    this.dominantSound.scheduledVolume = this._scheduledVolume
+    this.ambientSound.scheduledVolume = this._scheduledVolume
+  }
+
+  get sound() {
+    return this._sound
+  }
+
   _getSoundAt(index) {
     return this._sound.sounds[index]
   }
 
   _filterSourcesByTerm(sources, term) {
     return sources.filter(obj => {
-      return obj.src[0].indexOf(term) >= 0
+      let _src
+      if (obj.src.length) {
+        if (obj.src[0]) {
+          _src = obj.src[0]
+        } else {
+          _src = obj.src[1]
+        }
+        return _src.indexOf(term) >= 0
+      }
+      return false
     })
   }
 }

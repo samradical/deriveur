@@ -79,8 +79,11 @@ export default class EffectSound {
       Emitter.emit(`volumescheduler:effects:up`)
       let _source = this._dominantSources.shift()
       this._dominantSound.newSound(_source, 'dominant', {
-          autoplay: true
+          autoplay: true,
+          volume:this.scheduledVolume
         }, true)
+      console.log("____________");
+      console.log(this._dominantSound.volume)
         //this._dominantSound.play()
     } else {
       this.onDominantEnded()
@@ -142,7 +145,7 @@ export default class EffectSound {
 
   get playing() {
     if (this._id === 'speaking') {
-      //console.log(this.activeSound.sound.soundname);
+      ////console.log(this.activeSound.sound.soundname);
     }
     if (this.activeSound) {
       return this.activeSound.playing
@@ -387,7 +390,6 @@ export default class EffectSound {
       duration: (typeof this.duration === 'Howl') ? 0 : this.duration
     }
 
-    Emitter.emit('log:log', `Sound ${this._id} ${this.activeSound.soundname} at ${this._activeSoundIndex} terminate()`);
     this.activeSound['markedToDestroy'] = true
     this.activeSound.terminatedSignal.remove(this._onTerminatedBound)
     this.activeSound.endedSignal.remove(this._onEndedBound)
@@ -401,8 +403,8 @@ export default class EffectSound {
 
     this._changeActiveSoundIndex()
     Emitter.emit('log:log:light', `----NEW ${this._id} ACTIVE SOUND at index ${this._activeSoundIndex}----`);
-    console.log(this.activeSound);
-    console.log(this._sounds);
+    //console.log(this.activeSound);
+    //console.log(this._sounds);
     Emitter.emit('log:log:light', `------------------------`);
   }
 

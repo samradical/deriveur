@@ -48,27 +48,27 @@ const SPEAKING = {
 const VOLUMES = { in : [{
     speaking: 1.,
     effects: 0.18,
-    music: 0.1,
+    music: 0.3,
   }, {
     speaking: 1.,
     effects: 0.12,
-    music: 0.1,
+    music: 0.5,
   }, {
     speaking: .9,
     effects: 0.2,
-    music: 0.2,
+    music: 0.6,
   }, {
     speaking: .9,
     effects: 0.1,
-    music: 0.2,
+    music: 0.5,
   }, {
     speaking: .9,
     effects: 0.2,
-    music: 0.1,
+    music: 0.4,
   }, {
     speaking: 1,
     effects: 0.1,
-    music: 0.2,
+    music: 0.5,
   }],
   out: [{
     speaking: 0.3,
@@ -112,6 +112,12 @@ const P = (() => {
       _beatCount++
     })
 
+    Emitter.on('volumescheduler:reset', () => {
+      let _vol = _chooseRandom(_volumes)
+      _enhancer = {}
+      Emitter.emit('volume:change', _.assign({}, _vol, _enhancer))
+    })
+
     Emitter.on('volumescheduler:effects:up', () => {
       let _vol = _chooseRandom(_volumes)
       _enhancer = EFFECTS.up
@@ -136,7 +142,7 @@ const P = (() => {
       let _vol = _chooseRandom(_volumes)
       _enhancer = MUSIC.up
       let _f = _.assign({}, _vol, _enhancer)
-      console.log(_f);
+      //console.log(_f);
       Emitter.emit('volume:change', _f)
     })
     Emitter.on('volumescheduler:music:down', () => {

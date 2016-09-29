@@ -106,9 +106,9 @@ export default class LayerManager {
         */
         if (key === 'music' && State.state === 'in') {
           //_v = Math.min(_v, layer.scheduledVolume)
-          /*console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&");
-          console.log(key, (1. * val * VOLUME_MOD_INTENSITY), _v, layer.scheduledVolume);
-          console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&");*/
+          /*//console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&");
+          //console.log(key, (1. * val * VOLUME_MOD_INTENSITY), _v, layer.scheduledVolume);
+          //console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&");*/
         }
       }
     })
@@ -217,6 +217,15 @@ export default class LayerManager {
 
   get layers() {
     return this.SOUND_LAYERS
+  }
+
+  get layerSounds(){
+    console.log(this.SOUND_LAYERS);
+    console.log(this._soundLayers);
+    return this._soundLayers.map(layer=>{
+      console.log(layer);
+      return layer.sound
+    })
   }
 
 

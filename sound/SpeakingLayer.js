@@ -18,7 +18,7 @@ export default class SpeakingLayer extends BaseLayer {
   }
 
   onMetronome() {
-    //console.log(this._beatCounter, this._beat, this._playingInterlude);
+    ////console.log(this._beatCounter, this._beat, this._playingInterlude);
     if (!this._sound.playing &&
       !this._playingInterlude &&
       (this._beatCounter % this._beat) === 0) {
@@ -45,7 +45,7 @@ export default class SpeakingLayer extends BaseLayer {
   }
 
   mapEntering(location) {
-    console.log("Speaking mapEntering");
+    //console.log("Speaking mapEntering");
     if (this._sound.playing) {
       this.ramp(CONFIG.baseSoundFadeOut, { volume: 0, end: true }, true)
       setTimeout(() => {
@@ -93,12 +93,7 @@ export default class SpeakingLayer extends BaseLayer {
       this._playingInterlude = true
       Emitter.emit('layer:effects:playdominent')
     } else {
-      _r = Math.random()
-      if (_r > 0.5) {
-        Emitter.emit('layer:music:rampup')
-      } else {
-        Emitter.emit('layer:effects:playambient')
-      }
+      Emitter.emit('layer:music:rampup')
       this._playingInterlude = false
     }
 
@@ -108,6 +103,10 @@ export default class SpeakingLayer extends BaseLayer {
     setTimeout(() => {
       //Emitter.emit('layer:effects:dominant:ended')
     }, 3000)
+  }
+
+  _buildOutPlaylist(){
+    this._playlist.length = 0
   }
 
   play() {

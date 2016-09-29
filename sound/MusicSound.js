@@ -63,7 +63,7 @@ export default class MusicSound {
 
   get playing() {
     if (this._id === 'speaking') {
-      //console.log(this.activeSound.sound.soundname);
+      ////console.log(this.activeSound.sound.soundname);
     }
     if (this.activeSound) {
       return this.activeSound.playing

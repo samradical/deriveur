@@ -15,9 +15,11 @@ export default class MusicLayer extends BaseLayer {
   }
 
   onMetronome() {
+    console.log(this._sound.playing, this._sound.soundLoading);
     if (!this._sound.playing &&
+      !this._sound.soundLoading &&
       (this._beatCounter % this._beat) === 0) {
-      //this.play()
+      this._fadeOutAndLoadPlayNext()
     }
     super.onMetronome()
   }
@@ -56,15 +58,27 @@ export default class MusicLayer extends BaseLayer {
     this.ramp(CONFIG.transitionRampDur, { volume: 0, end: true }, true)*/
     //this.ramp(CONFIG.transitionRampDur, { volume: 0, end: true }, true)
     this._buildOutPlaylist()
-    this._fadeOutAndLoadPlayNext()
+    /*if(this._sound.playing){
+      this.ramp(1, {volume:0, end:true}, true)
+    }else{
+    }*/
+    this._fadeOutAndLoadPlayNext(null)
     this._state = State.state
   }
 
-  _fadeOutAndLoadPlayNext(sources){
-    this._loadNext({ noPartialPlay: true, autoplay: true }, sources, true)
+  _fadeOutAndLoadPlayNext(sources, options = {}) {
+    this._loadNext(_.merge({ noPartialPlay: true, autoplay: true, volume:this.scheduledVolume }, options), sources, true)
   }
 
   onEnded(endObj) {
-    this._loadNext({ autoplay: true, noPartialPlay: true }, null, true)
+    //this._loadNext({ autoplay: true, noPartialPlay: true }, null, true)
   }
+
+  onPlaying() {
+  }
+
+  set volume(vol) {
+    this._sound.volume = vol
+  }
+
 }
