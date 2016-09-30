@@ -15,7 +15,6 @@ export default class MusicLayer extends BaseLayer {
   }
 
   onMetronome() {
-    console.log(this._sound.playing, this._sound.soundLoading);
     if (!this._sound.playing &&
       !this._sound.soundLoading &&
       (this._beatCounter % this._beat) === 0) {

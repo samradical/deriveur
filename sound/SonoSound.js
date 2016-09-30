@@ -1,4 +1,4 @@
-import H from 'howler'
+import Sono from '@stinkdigital/sono'
 import Signals from 'signals'
 import { CONFIG } from '../setup/config'
 import Emitter from '../utils/DerivEmitter'
@@ -17,12 +17,15 @@ const NEAR_FACTOR_TOLERANCE_MIN = 0.1
 const MIN_SPEAK_TIME = 10
 
 
-export default class HowlerSound {
+export default class SonoSound {
   constructor(soundOptions, id) {
     this._id = id
     this.unique = Math.random().toString()
     this._soundOptions = _.clone(soundOptions)
-      //this._sProxy = new SoundProxy(this._soundOptions, (prop, val) => { this.onPropertyChanged(prop, val) })
+    if (this._soundOptions.autoplay) {
+      this._soundOptions.autoPlay = true
+        //this._sProxy = new SoundProxy(this._soundOptions, (prop, val) => { this.onPropertyChanged(prop, val) })
+    }
     this._volumeTweenObj = {
       volume: soundOptions.volume
     }
@@ -35,41 +38,31 @@ export default class HowlerSound {
     this._onFadeBound = this._onFade.bind(this)
     this._onPauseBound = this._onPause.bind(this)
     this._onPlayBound = this._onPlay.bind(this)
-
-    this.sound = new H.Howl(soundOptions)
-    this.sound.on('load', this._onLoadedBound)
+    this.sound = Sono.createSound(this._soundOptions)
+    this.sound.on('loaded', this._onLoadedBound)
     this.sound.on('pause', this._onPauseBound)
     this.sound.on('play', this._onPlayBound)
-    this.sound.on('end', this._onEndedBound)
-    this.sound.soundname = soundOptions.name
+    this.sound.on('ended', this._onEndedBound)
+    this._soundName = soundOptions.name
       //we will update this with the metronome
     this.timeCounter = 0
-
-    if (!CONFIG.partialPlay || soundOptions.noPartialPlay) {
-      soundOptions.nearFactor = null
-    } else {
-      this.sound.nearFactor = 1 - (soundOptions.nearFactor)
-    }
-    /*
-    we invert because we want this value to be high when close,
-    so it plays the entirety of clips when near location center
-    */
-    this.sound.dominant = soundOptions.dominant
-    this.overlapTime = Math.random() * CONFIG.effectSpeakingOverlapMax
     this._easeVolume = EaseNumbers.addNew(soundOptions.volume, 0.4)
-  }
 
+    if (this._soundOptions.autoplay) {
+      this.play()
+    }
+  }
 
   get playing() {
     if (!this.sound)
       return false
-    return this.sound.playing()
+    return this.sound.playing
   }
 
   get volume() {
     if (!this.sound)
       return 0
-    return this.sound.volume()
+    return this.sound.volume
   }
 
   set volume(v) {
@@ -78,21 +71,25 @@ export default class HowlerSound {
 
   duration() {
     if (this.sound) {
-      return this.sound.duration() || 0
+      return this.sound.duration || 0
     }
     return 0
   }
 
   fade(fromVol, toVol, dur) {
     if (this.sound) {
-      this.sound.fade(fromVol, toVol, dur)
+      this.ramp(dur, { volume: toVol })
     }
   }
 
   play(dur = 500, volume = 1) {
+    /*console.log(">>>>>>>>>>>>>>>>>>>>");
+    console.log(this.sound);
+    console.log(this.sound.playing);
+    console.log(this.hasFinished);*/
     if (this.sound) {
-      if (!this.sound.playing()) {
-        this.sound.fade(0, this._easeVolume.value, dur)
+      if (!this.sound.playing && !this.hasFinished) {
+        this.sound.volume = this._easeVolume.value
         this.sound.play()
       }
     }
@@ -141,7 +138,7 @@ export default class HowlerSound {
 
   update() {
     if (!this._rampingVolume && this.sound) {
-      this.sound.volume(this._easeVolume.value)
+      this.sound.volume = this._easeVolume.value
     }
   }
 
@@ -163,10 +160,7 @@ export default class HowlerSound {
   }
 
   get soundname() {
-    if (!this.sound) {
-      return ""
-    }
-    return this.sound.soundname
+    return this._soundName || ""
   }
 
   get nearFactor() {
@@ -174,12 +168,12 @@ export default class HowlerSound {
   }
 
   get loaded() {
-    return this.sound.isLoaded
+    return this._loaded
   }
 
   get progress() {
     let _s = this.sound.seek()
-    let _pos = (_s / this.sound.duration()) || 0
+    let _pos = (_s / this.sound.duration || 0)
     return _pos
   }
 
@@ -187,47 +181,14 @@ export default class HowlerSound {
     if (this.loadedSignal) {
       this.loadedSignal.dispatch(this)
     }
-    if (CONFIG.partialPlayOnBackground) {
-      if (this._id === 'speaking') {
-        this._setPlaytime()
-      }
-    } else {
-      this._setPlaytime()
-    }
-
-    Emitter.emit('log:log:light', `Sound ${this._id} ${this.sound.soundname} Loaded duration: ${this.sound.duration()}`);
-    Emitter.emit('log:log:light', `Sound ${this._id} playtime: ${this.playtime} nearFactor: ${this.sound.nearFactor}`, 2);
-
     this._loaded = true
-    this.sound.isLoaded = true
-
-  }
-
-  _setPlaytime() {
-    //!!!!
-
-    if (this.sound.nearFactor) {
-      this.playtime = this._getPlaytimeFromNearFactor(
-        this.sound.duration(),
-        this.sound.nearFactor
-      )
-      if (CONFIG.entropyCut) {
-
-        this.playtime = Utils.clamp(
-          Math.random() * CONFIG.maxSpeakingTime,
-          CONFIG.minSpeakingTime,
-          CONFIG.maxSpeakingTime)
-      }
-      this.sound.playtime = this.playtime
-    } else if (this.sound.playtime) {
-      this.sound.playtime = Math.min(this.sound.playtime, this.sound.duration())
-    }
   }
 
   _onPlay() {
-    if (this.playingSignal) {
+    if (this.playingSignal && !this._isPlaying) {
       this.playingSignal.dispatch(this)
     }
+    this._isPlaying = true
   }
 
   _onPause() {}
@@ -239,7 +200,7 @@ export default class HowlerSound {
   _onEnded() {
     //pass this in the terminatedSignal
     if (this.sound) {
-      this.sound.hasFinished = true
+      this.hasFinished = true
       if (this.endedSignal) {
         this.endedSignal.dispatch(this)
       }
@@ -249,19 +210,8 @@ export default class HowlerSound {
   pause() {
     this._isPaused = true
     if (this.sound) {
-      this.sound.pause()
+      this.sound.stop()
     }
-  }
-
-  _getPlaytimeFromNearFactor(duration, nearFactor) {
-    if (nearFactor > NEAR_FACTOR_TOLERANCE_MAX) {
-      return duration
-    } else if (nearFactor < NEAR_FACTOR_TOLERANCE_MIN) {
-      return Math.min(duration, NEAR_FACTOR_DURATION_MAPPING_MIN)
-    }
-    let _d = duration * nearFactor
-    _d = Utils.clamp(_d, MIN_SPEAK_TIME, duration)
-    return _d
   }
 
   _terminate() {
@@ -286,14 +236,14 @@ export default class HowlerSound {
     if (this.loadedSignal) {
       this.loadedSignal.dispose()
     }
-    let _s = this.sound.soundname
-    this.sound.off('load', this._onLoadedBound)
+    let _s = this._soundName
+    this.sound.off('loaded', this._onLoadedBound)
     this.sound.off('play', this._onPlayBound)
     this.sound.off('pause', this._onPauseBound)
     this.sound.off('fade', this._onFadeBound)
-    this.sound.off('end', this._onEndedBound)
+    this.sound.off('ended', this._onEndedBound)
     this.sound.stop()
-    this.sound.unload()
+    this.sound.destroy()
     this.sound = null
     this._onLoadedBound = null
     this._onEndedBound = null
@@ -305,6 +255,6 @@ export default class HowlerSound {
     this.playingSignal = null
     this.loadedSignal = null
 
-    console.log("HowlerSoundDestoyed", _s, this.unique);
+    console.log("SonoSoundDestoyed", _s, this.unique);
   }
 }

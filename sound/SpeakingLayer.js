@@ -18,11 +18,9 @@ export default class SpeakingLayer extends BaseLayer {
   }
 
   onMetronome() {
-    ////console.log(this._beatCounter, this._beat, this._playingInterlude);
     if (!this._sound.playing &&
       !this._playingInterlude &&
       (this._beatCounter % this._beat) === 0) {
-
       this.play()
     }
     /*    if (!this._sound.playing && this._playlist.length) {

@@ -1,4 +1,5 @@
 import HowlerSound from './HowlerSound'
+import SonoSound from './SonoSound'
 import Signals from 'signals'
 import _ from 'lodash'
 import { CONFIG } from '../setup/config'
@@ -73,7 +74,6 @@ export default class BaseSound {
     }
     let _o = _.merge({
         name: name,
-        autoplay: false,
         volume: this.scheduledVolume,
         loop: false
       },
@@ -82,14 +82,14 @@ export default class BaseSound {
       soundOptions
     )
     this.terminate()
-    this.sound = new HowlerSound(_o, this._id)
+    this.sound = new SonoSound(_o, this._id)
+    //this.sound = new HowlerSound(_o, this._id)
     this.sound.terminatedSignal.addOnce(this._onTerminatedBound)
     this.sound.endedSignal.addOnce(this._onEndedBound)
     this.sound.playingSignal.addOnce(this._onPlayBound)
     this.sound.loadedSignal.addOnce(this._onLoadedBound)
     this._loadingSound = true
     console.log("Loading new Sound:");
-    console.log(_o);
   }
 
   onMetronome() {

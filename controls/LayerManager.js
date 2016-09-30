@@ -220,10 +220,7 @@ export default class LayerManager {
   }
 
   get layerSounds(){
-    console.log(this.SOUND_LAYERS);
-    console.log(this._soundLayers);
     return this._soundLayers.map(layer=>{
-      console.log(layer);
       return layer.sound
     })
   }

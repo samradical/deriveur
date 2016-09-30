@@ -69,7 +69,7 @@ export default class Tour {
     //Emitter.emit('ext:tour:nextlocation', this.nextLocation)
   }
 
-  _latLngObj(pos) {
+  _latLngObj(pos = {}) {
     return { latitude: pos.latitude, longitude: pos.longitude }
   }
 
@@ -77,7 +77,7 @@ export default class Tour {
     let _d = geolib.getDistance(
       this._latLngObj({ latitude: location.latitude, longitude: location.longitude }),
       this._latLngObj(this._userCoords))
-    location.distance = _d
+    location.distance = _d || 0
   }
 
   set locationsNear(locations) {

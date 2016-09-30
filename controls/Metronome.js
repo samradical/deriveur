@@ -1,15 +1,10 @@
-import H from 'howler'
+import Sono from '@stinkdigital/sono'
 import Emitter from '../utils/DerivEmitter'
 import Dilla from 'dilla';
 
 export default class Metronome {
   constructor(src, options) {
-    let _s = new H.Howl({
-      src: src,
-      autoplay: false,
-      loop: false
-    })
-    this.dilla = new Dilla(H.Howler.ctx, options);
+    this.dilla = new Dilla(Sono.context, options);
     var dilla = this.dilla
     var high = {
       'position': '*.1.01',
@@ -42,9 +37,6 @@ export default class Metronome {
       _t++
     })
     dilla.start()
-
-    _s.unload()
-    _s = null
   }
 
   pause() {

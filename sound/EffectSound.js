@@ -57,7 +57,7 @@ export default class EffectSound {
         this._ambientSound.newSound(
           _source,
           'ambient', {
-            autoplay: true
+            autoplay: true,
           },
           true
         )
@@ -80,11 +80,10 @@ export default class EffectSound {
       let _source = this._dominantSources.shift()
       this._dominantSound.newSound(_source, 'dominant', {
           autoplay: true,
+          autoPlay: true,
           volume:this.scheduledVolume
         }, true)
-      console.log("____________");
-      console.log(this._dominantSound.volume)
-        //this._dominantSound.play()
+        this._dominantSound.play()
     } else {
       this.onDominantEnded()
     }

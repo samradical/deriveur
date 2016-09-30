@@ -27,6 +27,7 @@ export default class BaseLayer {
 
             this._sound.loadedSignal.add((soundId) => {
                 //this.preloadNext()
+                Emitter.emit(`${this._id}:soundloaded`)
             })
             this._sound.playingSignal.add(this.onPlaying.bind(this))
 
