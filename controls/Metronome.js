@@ -1,10 +1,10 @@
-import Sono from '@stinkdigital/sono'
+//import Sono from '@stinkdigital/sono'
 import Emitter from '../utils/DerivEmitter'
 import Dilla from 'dilla';
 
 export default class Metronome {
   constructor(src, options) {
-    this.dilla = new Dilla(Sono.context, options);
+    this.dilla = new Dilla(window.sono.context, options);
     var dilla = this.dilla
     var high = {
       'position': '*.1.01',

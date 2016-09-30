@@ -1,4 +1,4 @@
-import Sono from '@stinkdigital/sono'
+//import Sono from '@stinkdigital/sono'
 import Signals from 'signals'
 import { CONFIG } from '../setup/config'
 import Emitter from '../utils/DerivEmitter'
@@ -38,7 +38,7 @@ export default class SonoSound {
     this._onFadeBound = this._onFade.bind(this)
     this._onPauseBound = this._onPause.bind(this)
     this._onPlayBound = this._onPlay.bind(this)
-    this.sound = Sono.createSound(this._soundOptions)
+    this.sound = window.sono.createSound(this._soundOptions)
     this.sound.on('loaded', this._onLoadedBound)
     this.sound.on('pause', this._onPauseBound)
     this.sound.on('play', this._onPlayBound)
@@ -108,7 +108,7 @@ export default class SonoSound {
     this._rampingVolume = true
       //console.log(`Sound ${this._id} ${this.sound.soundname} ramp: ${JSON.stringify(options)}`);
     this._volumeTweenObj.volume = this._easeVolume.value
-    TweenLite.to(
+    window.TweenLite.to(
       this._volumeTweenObj,
       duration, {
         volume: options.volume,
