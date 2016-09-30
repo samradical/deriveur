@@ -146,7 +146,7 @@ export default class Map {
           this._activeLocationIndex = this._locations.indexOf(this._activeLocation)
           Emitter.emit('map:entering', this._activeLocation)
           Emitter.emit(`ext:map:entering`, this._activeLocation, this._activeLocationIndex)
-          //this._startTimeout()
+          this._startTimeout(4000)
         } else {
           /*
           Within the same location
@@ -184,12 +184,12 @@ export default class Map {
     )
   }
 
-  _startTimeout() {
+  _startTimeout(dur) {
     this._allowLocationChange = false
     clearTimeout(this._coolTo)
     this._coolTo = setTimeout(() => {
       this._allowLocationChange = true
-    }, TIMEOUT_TIME)
+    }, dur || TIMEOUT_TIME)
   }
 
 
