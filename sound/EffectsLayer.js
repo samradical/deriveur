@@ -106,6 +106,9 @@ export default class EffectsLayer extends BaseLayer {
         } else {
           _src = obj.src[1]
         }
+        if(!_src){
+          return false
+        }
         return _src.indexOf(term) >= 0
       }
       return false

@@ -39,7 +39,7 @@ const MUSIC = {
 const SPEAKING = {
   up: {
     music: 0.,
-    effects: 0.,
+    effects: 0.25,
   },
   down: {
   }
@@ -47,11 +47,11 @@ const SPEAKING = {
 
 const VOLUMES = { in : [{
     speaking: 1.,
-    effects: 0.18,
+    effects: 0.25,
     music: 0.3,
   }, {
     speaking: 1.,
-    effects: 0.12,
+    effects: 0.4,
     music: 0.5,
   }, {
     speaking: .9,
@@ -59,7 +59,7 @@ const VOLUMES = { in : [{
     music: 0.6,
   }, {
     speaking: .9,
-    effects: 0.1,
+    effects: 0.4,
     music: 0.5,
   }, {
     speaking: .9,
@@ -67,7 +67,7 @@ const VOLUMES = { in : [{
     music: 0.4,
   }, {
     speaking: 1,
-    effects: 0.1,
+    effects: 0.2,
     music: 0.5,
   }],
   out: [{

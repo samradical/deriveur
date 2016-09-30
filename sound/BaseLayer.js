@@ -187,8 +187,8 @@ export default class BaseLayer {
             let _r = Math.random()
                 //roll to see if it should use the item
             if (_r > _l.nearFactor) {
-                let _sources = _l.sources.shift()
-                if (_sources) {
+                let _sources = _.compact(_l.sources.shift())
+                if (_sources && _sources.length) {
                     //!!!
                     let _s = {
                         src: _sources,

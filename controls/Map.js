@@ -146,7 +146,7 @@ export default class Map {
           this._activeLocationIndex = this._locations.indexOf(this._activeLocation)
           Emitter.emit('map:entering', this._activeLocation)
           Emitter.emit(`ext:map:entering`, this._activeLocation, this._activeLocationIndex)
-          this._startTimeout(4000)
+          this._startTimeout(6000)
         } else {
           /*
           Within the same location

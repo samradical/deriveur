@@ -29,6 +29,8 @@ export default class SonoSound {
     this._volumeTweenObj = {
       volume: soundOptions.volume
     }
+    this._soundOptions.src = _.compact(this._soundOptions.src)
+    console.log(this._soundOptions);
     this.endedSignal = new Signals()
     this.terminatedSignal = new Signals()
     this.playingSignal = new Signals()

@@ -46,13 +46,13 @@ export default class EffectSound {
   }
 
   playAmbient() {
-    return
     if (this._ambientSources) {
       if (this._ambientSources.length) {
         let _source = this._ambientSources.shift()
         this._ambientSound.newSound(
           _source,
           'ambient', {
+            autoPlay: true,
             autoplay: true,
             loop: true
           },
