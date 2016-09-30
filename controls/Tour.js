@@ -55,6 +55,11 @@ export default class Tour {
     clearTimeout(this._inTo)
     this._inTo = setTimeout(()=>{
       this._activeLocation.visited = true
+      this.addLocationToStorage(this._activeLocation.id)
+      setTimeout(()=>{
+        let _id = this._seenLocations.shift()
+        _.find(this._tour, { id: _id }).visited = false
+      }, 180000)
     }, 10000)
   }
 
@@ -97,6 +102,9 @@ export default class Tour {
       let _f = _.find(this._tour, { id: l.id })
       if (!_f) {
         return this._tour[0]
+      }
+      if(this._seenLocations.indexOf(l.id) > -1){
+        return false
       }
       return _f.visited === false
     })[0] || this._tour[0]
