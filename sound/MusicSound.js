@@ -14,8 +14,8 @@ export default class MusicSound {
     ]
 
     this._sound = new BaseSound({}, 'music')
-    this._sound.endingSignal.add(this.onEnding.bind(this))
-    this._sound.endedSignal.add(this.onEnded.bind(this))
+    //this._sound.endingSignal.add(this.onEnding.bind(this))
+    //this._sound.endedSignal.add(this.onEnded.bind(this))
 
     Emitter.on('volume:change', volumes => { this.scheduledVolume = volumes.music })
   }
@@ -24,12 +24,6 @@ export default class MusicSound {
     _.each(this._sounds, sound => {
       sound.onMetronome()
     })
-  }
-
-  onBeat() {
-    if (!this._sound.playing) {
-      this.playAmbient()
-    }
   }
 
   mapEntering() {
@@ -45,6 +39,7 @@ export default class MusicSound {
   play(source) {
     this._dominantSound.newSound(source, 'music', {
       autoplay: true,
+      loop: true,
       volume: this._scheduledVolume
     }, true)
   }

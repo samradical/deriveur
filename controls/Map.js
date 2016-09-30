@@ -6,10 +6,13 @@ import Signals from 'signals'
 import { OUTSIDE_BARBI_NEAR } from '../setup/LOCATIONS' //meters
 import { CONFIG } from '../setup/config'
 
+const TIMEOUT_TIME = 5000
+
 export default class Map {
   constructor(locations, options = {}) {
     this._locations = locations
     this._options = options
+    this._allowLocationChange = true
 
     this.MapOptions = {
       enableHighAccuracy: true,
@@ -132,30 +135,35 @@ export default class Map {
     Check to see if the closest location to postion is the same,
     if not dispatch
     */
-    if (_locations.length) {
-      /*
-      Entering a new location
-      */
-      if (this._activeLocation !== _locations[0]) {
-        this._activeLocation = _locations[0]
-        this._activeLocationIndex = this._locations.indexOf(this._activeLocation)
-        Emitter.emit('map:entering', this._activeLocation)
-        Emitter.emit(`ext:map:entering`, this._activeLocation, this._activeLocationIndex)
-      } else {
+    if (this._allowLocationChange) {
+
+      if (_locations.length) {
         /*
-        Within the same location
+        Entering a new location
         */
+        if (this._activeLocation !== _locations[0]) {
+          this._activeLocation = _locations[0]
+          this._activeLocationIndex = this._locations.indexOf(this._activeLocation)
+          Emitter.emit('map:entering', this._activeLocation)
+          Emitter.emit(`ext:map:entering`, this._activeLocation, this._activeLocationIndex)
+          //this._startTimeout()
+        } else {
+          /*
+          Within the same location
+          */
+        }
+        /*
+        Leaving a new location
+        */
+      } else if (this._activeLocation) {
+        this._activeLocation = null
+        Emitter.emit('map:leaving')
+        let _nearest = locationsNotIn[0]
+        let _index = parseInt(_nearest.key, 10)
+        _nearest.id = `loc${_index}`
+        Emitter.emit(`ext:map:leaving`, _nearest, _index)
+        this._startTimeout()
       }
-      /*
-      Leaving a new location
-      */
-    } else if (this._activeLocation) {
-      this._activeLocation = null
-      Emitter.emit('map:leaving')
-      let _nearest = locationsNotIn[0]
-      let _index = parseInt(_nearest.key, 10)
-      _nearest.id = `loc${_index}`
-      Emitter.emit(`ext:map:leaving`, _nearest, _index)
     }
 
     let _lat = pos.coords.latitude
@@ -165,189 +173,198 @@ export default class Map {
       this._storedLocations.shift()
     }
     Emitter.emit('map:movement', this._hasPersonMoved())
-
   }
 
   _orderLocationsByDistance(currentPos, locations) {
     return geolib.orderByDistance(
       this._latLngObj(currentPos),
       locations.map(location => {
-          return _.assign({}, this._latLngObj(location), { id: location.id })
+        return _.assign({}, this._latLngObj(location), { id: location.id })
       })
-  )
-}
-
-_getLocationsIn(locations, pos, radius) {
-  let _currentPos = this._latLngObj(pos)
-  let _actives = locations.filter(location => {
-    return geolib.isPointInCircle(_currentPos,
-      this._latLngObj(location),
-      radius || location.radius
-    );
-  })
-
-  geolib.orderByDistance(_currentPos, _actives);
-  return _actives
-}
-
-_hasPersonMoved() {
-  let _t = 0
-  let _c = 0
-  for (var i = 0; i < this._storedLocations.length; i += 2) {
-    let _f = this._storedLocations.slice(i, 1)[0]
-    let _l = this._storedLocations.slice(i + 1, 1)[0]
-    if (_f && _l) {
-      _t += geolib.getDistance(
-        this._latLngObj(_f),
-        this._latLngObj(_l))
-      _c++
-    }
+    )
   }
-  let _average = _t / _c
-  if (isNaN(_average)) {
-    return false
+
+  _startTimeout() {
+    this._allowLocationChange = false
+    clearTimeout(this._coolTo)
+    this._coolTo = setTimeout(() => {
+      this._allowLocationChange = true
+    }, TIMEOUT_TIME)
   }
-  return _average > this._options.personalMovement
-}
 
-//************
-//SETUP
-//************
 
-_addLocationToMap(map, location) {
-  // Add the circle for this city to the map.
-  var cityCircle = new google.maps.Circle({
-    strokeColor: '#FF0000',
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-    clickable: false,
-    fillColor: '#FF0000',
-    fillOpacity: 0.35,
-    map: map,
-    center: { lat: location.latitude, lng: location.longitude },
-    radius: location.radius
-  });
-}
 
-_drawMap(pos) {
+  _getLocationsIn(locations, pos, radius) {
+    let _currentPos = this._latLngObj(pos)
+    let _actives = locations.filter(location => {
+      return geolib.isPointInCircle(_currentPos,
+        this._latLngObj(location),
+        radius || location.radius
+      );
+    })
 
-  var mapcanvas = document.createElement('div');
-  mapcanvas.id = 'mapcontainer';
-  mapcanvas.style.height = '400px';
-  mapcanvas.style.width = '320px';
+    geolib.orderByDistance(_currentPos, _actives);
+    return _actives
+  }
 
-  document.body.appendChild(mapcanvas);
-
-  var options = {
-    zoom: 17,
-    center: this._latLng(pos.coords),
-    mapTypeControl: false,
-    navigationControlOptions: {
-      style: google.maps.NavigationControlStyle.SMALL
-    },
-    styles: [
-      { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
-      { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
-      { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] }, {
-        featureType: 'administrative.locality',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#d59563' }]
-      }, {
-        featureType: 'poi',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#d59563' }]
-      }, {
-        featureType: 'poi.park',
-        elementType: 'geometry',
-        stylers: [{ color: '#263c3f' }]
-      }, {
-        featureType: 'poi.park',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#6b9a76' }]
-      }, {
-        featureType: 'road',
-        elementType: 'geometry',
-        stylers: [{ color: '#38414e' }]
-      }, {
-        featureType: 'road',
-        elementType: 'geometry.stroke',
-        stylers: [{ color: '#212a37' }]
-      }, {
-        featureType: 'road',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#9ca5b3' }]
-      }, {
-        featureType: 'road.highway',
-        elementType: 'geometry',
-        stylers: [{ color: '#746855' }]
-      }, {
-        featureType: 'road.highway',
-        elementType: 'geometry.stroke',
-        stylers: [{ color: '#1f2835' }]
-      }, {
-        featureType: 'road.highway',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#f3d19c' }]
-      }, {
-        featureType: 'transit',
-        elementType: 'geometry',
-        stylers: [{ color: '#2f3948' }]
-      }, {
-        featureType: 'transit.station',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#d59563' }]
-      }, {
-        featureType: 'water',
-        elementType: 'geometry',
-        stylers: [{ color: '#17263c' }]
-      }, {
-        featureType: 'water',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#515c6d' }]
-      }, {
-        featureType: 'water',
-        elementType: 'labels.text.stroke',
-        stylers: [{ color: '#17263c' }]
-      }, {
-        featureType: "poi",
-        stylers: [
-          { visibility: "off" }
-        ]
+  _hasPersonMoved() {
+    let _t = 0
+    let _c = 0
+    for (var i = 0; i < this._storedLocations.length; i += 2) {
+      let _f = this._storedLocations.slice(i, 1)[0]
+      let _l = this._storedLocations.slice(i + 1, 1)[0]
+      if (_f && _l) {
+        _t += geolib.getDistance(
+          this._latLngObj(_f),
+          this._latLngObj(_l))
+        _c++
       }
-    ],
-    mapTypeId: google.maps.MapTypeId.ROADMAP
-  };
-
-  this.map = new google.maps.Map(document.getElementById("mapcontainer"), options);
-  google.maps.event.addListener(this.map, 'tilesloaded', () => {
-    //console.log("Tiled Loaded");
-    this.mapLoadedSignal.dispatch()
-  });
-  this._locations.forEach(location => {
-    this._addLocationToMap(this.map, location)
-  })
-
-  this.me = new google.maps.Marker({
-    position: this._latLng(pos.coords),
-    map: this.map,
-    title: 'Me'
-  });
-
-  google.maps.event.addListener(this.map, 'click', (event) => {
-    this.updatePosition({ coords: { latitude: event.latLng.lat(), longitude: event.latLng.lng() } })
-  });
-  //console.log("Draw map");
-}
-
-_nextLocation() {
-  let _i = this._activeLocationIndex + 1
-  if (_i >= this._locations.length) {
-    _i = 0
+    }
+    let _average = _t / _c
+    if (isNaN(_average)) {
+      return false
+    }
+    return _average > this._options.personalMovement
   }
-  this._activeLocationIndex = _i
-  //console.log(this._activeLocationIndex, this._locations.length);
-  this.updatePosition({
-    coords: this._locations[this._activeLocationIndex]
-  })
-}
+
+  //************
+  //SETUP
+  //************
+
+  _addLocationToMap(map, location) {
+    // Add the circle for this city to the map.
+    var cityCircle = new google.maps.Circle({
+      strokeColor: '#FF0000',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      clickable: false,
+      fillColor: '#FF0000',
+      fillOpacity: 0.35,
+      map: map,
+      center: { lat: location.latitude, lng: location.longitude },
+      radius: location.radius
+    });
+  }
+
+  _drawMap(pos) {
+
+    var mapcanvas = document.createElement('div');
+    mapcanvas.id = 'mapcontainer';
+    mapcanvas.style.height = '400px';
+    mapcanvas.style.width = '320px';
+
+    document.body.appendChild(mapcanvas);
+
+    var options = {
+      zoom: 17,
+      center: this._latLng(pos.coords),
+      mapTypeControl: false,
+      navigationControlOptions: {
+        style: google.maps.NavigationControlStyle.SMALL
+      },
+      styles: [
+        { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+        { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] }, {
+          featureType: 'administrative.locality',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#d59563' }]
+        }, {
+          featureType: 'poi',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#d59563' }]
+        }, {
+          featureType: 'poi.park',
+          elementType: 'geometry',
+          stylers: [{ color: '#263c3f' }]
+        }, {
+          featureType: 'poi.park',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#6b9a76' }]
+        }, {
+          featureType: 'road',
+          elementType: 'geometry',
+          stylers: [{ color: '#38414e' }]
+        }, {
+          featureType: 'road',
+          elementType: 'geometry.stroke',
+          stylers: [{ color: '#212a37' }]
+        }, {
+          featureType: 'road',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#9ca5b3' }]
+        }, {
+          featureType: 'road.highway',
+          elementType: 'geometry',
+          stylers: [{ color: '#746855' }]
+        }, {
+          featureType: 'road.highway',
+          elementType: 'geometry.stroke',
+          stylers: [{ color: '#1f2835' }]
+        }, {
+          featureType: 'road.highway',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#f3d19c' }]
+        }, {
+          featureType: 'transit',
+          elementType: 'geometry',
+          stylers: [{ color: '#2f3948' }]
+        }, {
+          featureType: 'transit.station',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#d59563' }]
+        }, {
+          featureType: 'water',
+          elementType: 'geometry',
+          stylers: [{ color: '#17263c' }]
+        }, {
+          featureType: 'water',
+          elementType: 'labels.text.fill',
+          stylers: [{ color: '#515c6d' }]
+        }, {
+          featureType: 'water',
+          elementType: 'labels.text.stroke',
+          stylers: [{ color: '#17263c' }]
+        }, {
+          featureType: "poi",
+          stylers: [
+            { visibility: "off" }
+          ]
+        }
+      ],
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    this.map = new google.maps.Map(document.getElementById("mapcontainer"), options);
+    google.maps.event.addListener(this.map, 'tilesloaded', () => {
+      //console.log("Tiled Loaded");
+      this.mapLoadedSignal.dispatch()
+    });
+    this._locations.forEach(location => {
+      this._addLocationToMap(this.map, location)
+    })
+
+    this.me = new google.maps.Marker({
+      position: this._latLng(pos.coords),
+      map: this.map,
+      title: 'Me'
+    });
+
+    google.maps.event.addListener(this.map, 'click', (event) => {
+      this.updatePosition({ coords: { latitude: event.latLng.lat(), longitude: event.latLng.lng() } })
+    });
+    //console.log("Draw map");
+  }
+
+  _nextLocation() {
+    let _i = this._activeLocationIndex + 1
+    if (_i >= this._locations.length) {
+      _i = 0
+    }
+    this._activeLocationIndex = _i
+      //console.log(this._activeLocationIndex, this._locations.length);
+    this.updatePosition({
+      coords: this._locations[this._activeLocationIndex]
+    })
+  }
 }

@@ -45,12 +45,12 @@ export default class SpeakingLayer extends BaseLayer {
   mapEntering(location) {
     //console.log("Speaking mapEntering");
     if (this._sound.playing) {
-      this.ramp(CONFIG.baseSoundFadeOut, { volume: 0, end: true }, true)
+      this.ramp(CONFIG.baseSoundFadeOut, { volume: 0,autoPlay:true,  autoplay:true, end: true }, true)
       setTimeout(() => {
         this._loadNext({ autoplay: true })
       }, (CONFIG.baseSoundFadeOut + 0.1) * 1000)
     } else {
-      this._loadNext({ autoplay: true })
+      this._loadNext({ autoplay: true,autoPlay:true })
     }
   }
 

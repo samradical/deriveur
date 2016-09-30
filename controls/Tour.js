@@ -52,6 +52,10 @@ export default class Tour {
     let _f = _.find(this._tour, { id: locationId })
     this._activeLocation = _f
     this._activeLocation.active = true
+    clearTimeout(this._inTo)
+    this._inTo = setTimeout(()=>{
+      this._activeLocation.visited = true
+    }, 10000)
   }
 
   addLocationToStorage(locationId) {
@@ -62,7 +66,7 @@ export default class Tour {
 
   out() {
     if (this._activeLocation) {
-      this._activeLocation.visited = true
+      clearTimeout(this._inTo)
       this._activeLocation.active = false
       this.addLocationToStorage(this._activeLocation.id)
     }

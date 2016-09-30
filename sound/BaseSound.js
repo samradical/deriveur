@@ -46,9 +46,6 @@ export default class BaseSound {
 
   newSound(playlistObject, name = '', soundOptions = {}, force = false) {
     if (force) {
-      if(this._id === 'music'){
-      console.log(playlistObject);
-      }
       if (this.sound) {
 
         this._fadeAndDestroy(this.sound, 0, CONFIG.baseSoundFadeOut - 0.2)
@@ -58,7 +55,7 @@ export default class BaseSound {
 
           this._createNewSound(playlistObject, name, soundOptions)
 
-        }, CONFIG.baseSoundFadeOut * 1000)
+        }, (CONFIG.baseSoundFadeOut + Math.random() * 5) * 1000)
 
       } else {
         this._createNewSound(playlistObject, name, soundOptions)
@@ -82,14 +79,16 @@ export default class BaseSound {
       soundOptions
     )
     this.terminate()
-    this.sound = new SonoSound(_o, this._id)
-    //this.sound = new HowlerSound(_o, this._id)
-    this.sound.terminatedSignal.addOnce(this._onTerminatedBound)
-    this.sound.endedSignal.addOnce(this._onEndedBound)
-    this.sound.playingSignal.addOnce(this._onPlayBound)
-    this.sound.loadedSignal.addOnce(this._onLoadedBound)
+    setTimeout(()=>{
+      this.sound = new SonoSound(_o, this._id)
+      //this.sound = new HowlerSound(_o, this._id)
+      this.sound.terminatedSignal.addOnce(this._onTerminatedBound)
+      this.sound.endedSignal.addOnce(this._onEndedBound)
+      this.sound.playingSignal.addOnce(this._onPlayBound)
+      this.sound.loadedSignal.addOnce(this._onLoadedBound)
+      console.log("Loading new Sound:");
+    }, 50)
     this._loadingSound = true
-    console.log("Loading new Sound:");
   }
 
   onMetronome() {

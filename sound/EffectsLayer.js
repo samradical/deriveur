@@ -63,7 +63,7 @@ export default class EffectsLayer extends BaseLayer {
   }
 
   _playAmbient() {
-    this._sound.rampUpAmbient()
+    //this._sound.rampUpAmbient()
   }
 
   _playDominant() {

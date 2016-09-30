@@ -31,7 +31,7 @@ export default class EffectSound {
   }
 
   onBeat() {
-    this.playAmbient()
+    //this.playAmbient()
   }
 
 
@@ -39,18 +39,14 @@ export default class EffectSound {
 
   }
 
-  mapLeaving() {
-    this._ambientSound.ramp(
-        CONFIG.transitionRampDur, { volume: 0, end: true },
-        true)
-      //this.ramp(CONFIG.transitionRampDur, { volume: 0, end: true }, true)
-  }
+  mapLeaving() {}
 
   mapUpdate() {
 
   }
 
   playAmbient() {
+    return
     if (this._ambientSources) {
       if (this._ambientSources.length) {
         let _source = this._ambientSources.shift()
@@ -58,6 +54,7 @@ export default class EffectSound {
           _source,
           'ambient', {
             autoplay: true,
+            loop: true
           },
           true
         )
@@ -79,11 +76,11 @@ export default class EffectSound {
       Emitter.emit(`volumescheduler:effects:up`)
       let _source = this._dominantSources.shift()
       this._dominantSound.newSound(_source, 'dominant', {
-          autoplay: true,
-          autoPlay: true,
-          volume:this.scheduledVolume
-        }, true)
-        this._dominantSound.play()
+        autoplay: true,
+        autoPlay: true,
+        volume: this.scheduledVolume
+      }, true)
+      this._dominantSound.play()
     } else {
       this.onDominantEnded()
     }
@@ -117,8 +114,7 @@ export default class EffectSound {
     this._ambientSound.ramp(2, { volume: 0 })
   }
 
-  onAmbientEnded() {
-  }
+  onAmbientEnded() {}
 
   onDominantEnding() {
     //Emitter.emit('layer:effects:dominant:ending')
@@ -135,8 +131,7 @@ export default class EffectSound {
     Emitter.emit('ext:sound:dominant:playing')
   }
 
-  onAmbientPlaying() {
-  }
+  onAmbientPlaying() {}
 
   //**************
   //GET SET
@@ -302,7 +297,7 @@ export default class EffectSound {
     }
   }
 
-  destroy(){
+  destroy() {
     this._ambientSound.endedSignal.removeAll()
     this._ambientSound.playingSignal.removeAll()
     this._ambientSound.loadedSignal.removeAll()
