@@ -31,14 +31,16 @@ export default class Tour {
 
     setInterval(() => {
       let _n = this.nextLocation
-      let _bearing = geolib.getBearing(
-        this._latLngObj(this._userCoords), {
-          latitude: _n.latitude,
-          longitude: _n.longitude
-        }
-      )
-      Emitter.emit('ext:map:bearing', _bearing)
-      Emitter.emit('ext:tour:nextlocation', _n)
+      if(this._userCoords){
+        let _bearing = geolib.getBearing(
+          this._latLngObj(this._userCoords), {
+            latitude: _n.latitude,
+            longitude: _n.longitude
+          }
+        )
+        Emitter.emit('ext:map:bearing', _bearing)
+        Emitter.emit('ext:tour:nextlocation', _n)
+      }
     }, 4000)
 
     Emitter.emit('ext:tour:nextlocation', this.nextlocation)

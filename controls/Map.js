@@ -26,7 +26,7 @@ export default class Map {
     this._activeLocationIndex = -1
 
     this._boundUpdatePosition = this.updatePosition.bind(this)
-
+    this._boundGeoError = this.geolocationError.bind(this)
     this._storedLocations = []
 
     Emitter.on('gui:nextlocation', this._nextLocation.bind(this))
@@ -46,7 +46,10 @@ export default class Map {
       this._drawMap({ coords: { latitude: 0, longitude: 0 } })
     } else {
       //navigator.geolocation.getCurrentPosition(this._drawMap.bind(this), this.error, this.MapOptions);
-      navigator.geolocation.getCurrentPosition(this.updatePosition.bind(this));
+      navigator.geolocation.getCurrentPosition(
+        this.updatePosition.bind(this),
+        this._boundGeoError
+      );
       setTimeout(() => {
         this.mapLoadedSignal.dispatch()
       }, 200)
@@ -55,7 +58,10 @@ export default class Map {
     //**** interval
     if (!CONFIG.noGeo) {
       this._updateI = setInterval(() => {
-        navigator.geolocation.getCurrentPosition(this._boundUpdatePosition, this.error, this.MapOptions);
+        navigator.geolocation.getCurrentPosition(
+          this._boundUpdatePosition,
+          this._boundGeoError,
+          this.MapOptions);
       }, CONFIG.mapUpdateSpeed)
     }
 
@@ -90,7 +96,12 @@ export default class Map {
     return new google.maps.LatLng(coords.latitude, coords.longitude);
   }
 
+  geolocationError(err){
+    Emitter.emit('ext:map:error')
+  }
+
   updatePosition(pos) {
+    console.log(pos);
     if (this._paused) {
       return
     }
