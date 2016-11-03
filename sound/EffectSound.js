@@ -54,7 +54,7 @@ export default class EffectSound {
           'ambient', {
             autoPlay: true,
             autoplay: true,
-            loop: true
+            loop: false
           },
           true
         )
@@ -114,7 +114,9 @@ export default class EffectSound {
     this._ambientSound.ramp(2, { volume: 0 })
   }
 
-  onAmbientEnded() {}
+  onAmbientEnded() {
+    this.playAmbient()
+  }
 
   onDominantEnding() {
     //Emitter.emit('layer:effects:dominant:ending')

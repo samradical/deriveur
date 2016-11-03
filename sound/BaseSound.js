@@ -320,7 +320,9 @@ export default class BaseSound {
 
   _onEnded(index, soundName) {
     //pass this in the terminatedSignal
-    this.sound.hasFinished = true
+    if(this.sound){
+      this.sound.hasFinished = true
+    }
     this.terminate()
   }
 
