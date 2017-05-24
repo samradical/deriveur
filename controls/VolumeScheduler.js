@@ -52,23 +52,23 @@ const VOLUMES = { in : [{
   }, {
     speaking: 1.,
     effects: 0.4,
-    music: 0.5,
-  }, {
-    speaking: .9,
-    effects: 0.2,
-    music: 0.6,
-  }, {
-    speaking: .9,
-    effects: 0.4,
-    music: 0.5,
+    music: 0.4,
   }, {
     speaking: .9,
     effects: 0.2,
     music: 0.4,
   }, {
     speaking: 1,
+    effects: 0.4,
+    music: 0.4,
+  }, {
+    speaking: 1,
     effects: 0.2,
-    music: 0.5,
+    music: 0.4,
+  }, {
+    speaking: 1,
+    effects: 0.2,
+    music: 0.3,
   }],
   out: [{
     speaking: 0.3,
