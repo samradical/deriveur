@@ -228,12 +228,15 @@ export default class LayerManager {
 
   pause(){
     _.forIn(this.SOUND_LAYERS, (layer, key) => {
+      layer.__previousVolume = layer.volume
       layer.pause()
+      layer.volume = 0
     })
   }
 
   resume(){
     _.forIn(this.SOUND_LAYERS, (layer, key) => {
+      layer.volume = layer.__previousVolume
       layer.resume()
     })
   }
