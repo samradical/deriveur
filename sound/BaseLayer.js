@@ -266,14 +266,20 @@ export default class BaseLayer {
     We get the obj that will have the progress saved
     */
     play(fadeDur = 500) {
+        if(this._isPaused)  return
         this._sound.play(null, fadeDur)
     }
 
     pause() {
+        this._savedVolume = this.volume
+        this.volume = 0
+        this._isPaused = true
         this._sound.pause()
     }
 
     resume() {
+        this._isPaused = false
+        this.volume = this._savedVolume
         this._sound.resume()
     }
 
@@ -512,6 +518,7 @@ export default class BaseLayer {
     }
 
     set volume(vol) {
+        if(this._isPaused) return
         this._sound.volume = vol
     }
 

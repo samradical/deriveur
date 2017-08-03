@@ -1,9 +1,9 @@
 {
-  "name": "@samelie/deriveur",
+  "name": "deriveur",
   "description": "",
   "homepage": "https://github.com/samelie/deriveur",
   "author": "Sam Elie <samradelie@gmail.com>",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/samelie/deriveur.git",

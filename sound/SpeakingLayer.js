@@ -1,26 +1,32 @@
-import AssetLoader from '../utils/AssetLoader'
-import Utils from '../utils/UTILS'
-import State from '../controls/State'
-import Emitter from '../utils/DerivEmitter'
-import Sound from './BaseSound'
-import _ from 'lodash'
-import { PERSONAL_RADIUS } from '../setup/config' //meters
-import { CONFIG, RAMP_DOWN_DUR } from '../setup/config'
-import BaseLayer from './BaseLayer'
+import AssetLoader from "../utils/AssetLoader"
+import Utils from "../utils/UTILS"
+import State from "../controls/State"
+import Emitter from "../utils/DerivEmitter"
+import Sound from "./BaseSound"
+import _ from "lodash"
+import { PERSONAL_RADIUS } from "../setup/config" //meters
+import { CONFIG, RAMP_DOWN_DUR } from "../setup/config"
+import BaseLayer from "./BaseLayer"
 
 export default class SpeakingLayer extends BaseLayer {
   constructor(data) {
     super(data)
 
     //Emitter.on('layer:effects:dominant:ending', this._onEffectsDominantEnding.bind(this))
-    Emitter.on('layer:speaking:play', this._onPlayCommand.bind(this))
-    Emitter.on('layer:effects:dominant:ended', this._onEffectsDominantEnded.bind(this))
+    Emitter.on("layer:speaking:play", this._onPlayCommand.bind(this))
+    Emitter.on(
+      "layer:effects:dominant:ended",
+      this._onEffectsDominantEnded.bind(this)
+    )
   }
 
   onMetronome() {
-    if (!this._sound.playing &&
+    if (
+      !this._sound.playing &&
       !this._playingInterlude &&
-      (this._beatCounter % this._beat) === 0) {
+      this._beatCounter % this._beat === 0 &&
+      !this._isPaused
+    ) {
       this.play()
     }
     /*    if (!this._sound.playing && this._playlist.length) {
@@ -45,12 +51,16 @@ export default class SpeakingLayer extends BaseLayer {
   mapEntering(location) {
     //console.log("Speaking mapEntering");
     if (this._sound.playing) {
-      this.ramp(CONFIG.baseSoundFadeOut, { volume: 0,autoPlay:true,  autoplay:true, end: true }, true)
+      this.ramp(
+        CONFIG.baseSoundFadeOut,
+        { volume: 0, autoPlay: true, autoplay: true, end: true },
+        true
+      )
       setTimeout(() => {
         this._loadNext({ autoplay: true })
       }, (CONFIG.baseSoundFadeOut + 0.1) * 1000)
     } else {
-      this._loadNext({ autoplay: true,autoPlay:true })
+      this._loadNext({ autoplay: true, autoPlay: true })
     }
   }
 
@@ -61,10 +71,10 @@ export default class SpeakingLayer extends BaseLayer {
 
   onPlaying() {
     let _r = Math.random()
-    if (_r > (1 - CONFIG.chanceForSoloSpeaking)) {
-      Emitter.emit('volumescheduler:speaking:up')
-      Emitter.emit('ext:sound:speaking:playing')
-      Emitter.emit('volume:music:ramp', { volume: 0 })
+    if (_r > 1 - CONFIG.chanceForSoloSpeaking) {
+      Emitter.emit("volumescheduler:speaking:up")
+      Emitter.emit("ext:sound:speaking:playing")
+      Emitter.emit("volume:music:ramp", { volume: 0 })
     }
   }
 
@@ -84,43 +94,45 @@ export default class SpeakingLayer extends BaseLayer {
   onEnded(endObj) {
     super.onEnded(endObj)
     this._loadNext()
-      //Emitter.emit('layer:speaking:ended', Math.random())
+    //Emitter.emit('layer:speaking:ended', Math.random())
 
     let _r = Math.random() + State.nearFactor / 2
-    if (_r > (1 - CONFIG.chanceToPlayDominant)) {
+    if (_r > 1 - CONFIG.chanceToPlayDominant) {
       this._playingInterlude = true
-      Emitter.emit('layer:effects:playdominent')
+      Emitter.emit("layer:effects:playdominent")
     } else {
-      Emitter.emit('layer:music:rampup')
+      Emitter.emit("layer:music:rampup")
       this._playingInterlude = false
     }
 
-    Emitter.emit('ext:sound:speaking:ended')
-    Emitter.emit('volumescheduler:speaking:down')
-    Emitter.emit('volume:music:ramp:up')
+    Emitter.emit("ext:sound:speaking:ended")
+    Emitter.emit("volumescheduler:speaking:down")
+    Emitter.emit("volume:music:ramp:up")
     setTimeout(() => {
       //Emitter.emit('layer:effects:dominant:ended')
     }, 3000)
   }
 
-  _buildOutPlaylist(){
+  _buildOutPlaylist() {
     this._playlist.length = 0
   }
 
   play() {
+    if (this._isPaused) return
     super.play()
     Emitter.emit(`volumescheduler:music:down`)
   }
 
   _onPlayCommand() {
     this._playingInterlude = false
+    if (this._isPaused) return
     this.play()
   }
 
   _onEffectsDominantEnding() {
     this._playingInterlude = false
     Emitter.emit(`volumescheduler:effects:down`)
-      //this.play(Math.random() * CONFIG.maxSoundFadeInTime)
+    //this.play(Math.random() * CONFIG.maxSoundFadeInTime)
   }
 
   _onEffectsDominantEnded() {

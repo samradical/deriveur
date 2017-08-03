@@ -214,7 +214,7 @@ export default class Layer {
 
     switch (this._id) {
       case 'speaking':
-        if (!this._sound.playing && this._playlist.length) {
+        if (!this._sound.playing && this._playlist.length && !this._isPaused) {
           let _roll = Math.random()
           if (this._closestLocation) {
             let _f = this._closestLocation.nearFactor || 0
@@ -222,7 +222,7 @@ export default class Layer {
               console.log(this._effectInterlude);
               console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");*/
             _f += (this._effectInterlude || 0)
-            if (_roll > _f) {
+            if (_roll > _f ) {
               Emitter.emit('log:log', `Layer ${this._id} Playing:  Had to get ${_f}, got ${_roll}`, 2);
               this.play()
             } else {
@@ -467,11 +467,18 @@ export default class Layer {
     let _savedData = this._playedSources[_name]
     console.log(`Layer: play() ${this._id}`);
     console.log(_savedData);
+    if(this._isPaused)  return
     this._sound.play(_savedData)
   }
 
   pause() {
+    this._isPaused = true
     this._sound.pause()
+  }
+
+  resume(){
+    this._isPaused = false
+    this._sound.play()
   }
 
   /*rampDown(duration = 1, options = { volume: 0, pause: true }) {
