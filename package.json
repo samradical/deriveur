@@ -3,7 +3,7 @@
   "description": "",
   "homepage": "https://github.com/samelie/deriveur",
   "author": "Sam Elie <samradelie@gmail.com>",
-  "version": "0.0.2",
+  "version": "0.0.11",
   "repository": {
     "type": "git",
     "url": "https://github.com/samelie/deriveur.git",
@@ -46,8 +46,7 @@
       ]
     ]
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "bugs": {
     "url": "https://github.com/samelie/deriveur/issues"
   },

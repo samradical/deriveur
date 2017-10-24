@@ -79,7 +79,7 @@ export default class BaseSound {
       soundOptions
     )
     this.terminate()
-    setTimeout(()=>{
+    this._preloadTO = setTimeout(()=>{
       this.sound = new SonoSound(_o, this._id)
       //this.sound = new HowlerSound(_o, this._id)
       this.sound.terminatedSignal.addOnce(this._onTerminatedBound)
@@ -267,7 +267,10 @@ export default class BaseSound {
   }
 
   stop() {
+    if (this.sound) {
     this.sound.stop()
+  }
+
   }
 
   update() {
@@ -295,6 +298,11 @@ export default class BaseSound {
     if (this.sound) {
       this.sound.ramp(duration, options, final)
     }
+  }
+
+  unload(){
+    clearTimeout(this._newSoundTO)
+    clearTimeout(this._preloadTO)
   }
 
   ///********************
@@ -348,6 +356,7 @@ export default class BaseSound {
   }
 
   destroy() {
+    clearTimeout(this._preloadTO)
     this.terminate()
   }
 

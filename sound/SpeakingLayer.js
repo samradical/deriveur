@@ -21,6 +21,13 @@ export default class SpeakingLayer extends BaseLayer {
   }
 
   onMetronome() {
+    console.log("*************");
+    console.log(
+      this._sound.playing ,
+      this._playingInterlude ,
+      this._beatCounter % this._beat === 0 ,
+      this._isPaused);
+    console.log("*************");
     if (
       !this._sound.playing &&
       !this._playingInterlude &&
@@ -50,6 +57,7 @@ export default class SpeakingLayer extends BaseLayer {
 
   mapEntering(location) {
     //console.log("Speaking mapEntering");
+    if(this._isPaused) return
     if (this._sound.playing) {
       this.ramp(
         CONFIG.baseSoundFadeOut,

@@ -60,15 +60,21 @@ const P = (() => {
       Emitter.on('map:locations', (locations) => {})
 
       Emitter.on('controls:pause', () => {
-        this._metronome.pause()
+        if(this._metronome){
+        //this._metronome.pause()
+      }
       })
 
       Emitter.on('controls:resume', () => {
-        this._metronome.resume()
+        if(this._metronome){
+          //this._metronome.resume()
+        }
       })
 
       Emitter.on('controls:destroy', () => {
+        if(this._metronome){
         this._metronome.stop()
+      }
       })
 
       this.state = OUT

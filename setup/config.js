@@ -1,3 +1,5 @@
+let PERSONAL_RADIUS = 10
+
 let MAP_CONFIG = {
   verbose: true,
   maxStoreLocations: 10,
@@ -45,7 +47,6 @@ let CONFIG = {
 
 }
 
-let PERSONAL_RADIUS = 10
 let SOUND_LIMIT_UPDATE = 30
 
 

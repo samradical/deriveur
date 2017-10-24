@@ -275,7 +275,12 @@ export default class EffectSound {
   }
 
   stop() {
+    if (this.activeSound) {
     this.activeSound.stop()
+  }
+  }
+
+  unload() {
   }
 
   update() {
